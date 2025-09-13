@@ -1,0 +1,1060 @@
+{% extends 'base.html' %}
+
+{% block title %}Create New Habit - Green Sensei{% endblock %}
+
+{% block content %}
+<div class="habit-form-container">
+    <div class="form-header-card">
+        <div class="header-content">
+            <div class="header-icon">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <div class="header-text">
+                <h1>Create New Eco-Friendly Habit</h1>
+                <p>Add a new sustainable activity to track your environmental impact</p>
+            </div>
+        </div>
+        <div class="header-decoration">
+            <div class="decoration-circle"></div>
+            <div class="decoration-circle"></div>
+            <div class="decoration-circle"></div>
+        </div>
+    </div>
+
+    <form method="post" id="habitForm" class="habit-form">
+        {% csrf_token %}
+
+        <!-- Category Selection -->
+        <div class="form-section category-section">
+            <div class="section-header">
+                <i class="fas fa-tag"></i>
+                <h3>Choose Category</h3>
+            </div>
+            <div class="category-grid">
+                <label class="category-option" for="id_category_0">
+                    <input type="radio" id="id_category_0" name="category" value="transport" required>
+                    <div class="category-card transport-card">
+                        <div class="category-icon">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4>Transport</h4>
+                            <p>Sustainable transportation choices</p>
+                        </div>
+                        <div class="category-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </label>
+                <label class="category-option" for="id_category_1">
+                    <input type="radio" id="id_category_1" name="category" value="energy" required>
+                    <div class="category-card energy-card">
+                        <div class="category-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4>Energy</h4>
+                            <p>Energy conservation and efficiency</p>
+                        </div>
+                        <div class="category-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </label>
+                <label class="category-option" for="id_category_2">
+                    <input type="radio" id="id_category_2" name="category" value="food" required>
+                    <div class="category-card food-card">
+                        <div class="category-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4>Food</h4>
+                            <p>Sustainable eating habits</p>
+                        </div>
+                        <div class="category-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </label>
+                <label class="category-option" for="id_category_3">
+                    <input type="radio" id="id_category_3" name="category" value="waste" required>
+                    <div class="category-card waste-card">
+                        <div class="category-icon">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4>Waste</h4>
+                            <p>Reduce, reuse, and recycle</p>
+                        </div>
+                        <div class="category-check">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </label>
+            </div>
+            {% if form.category.errors %}
+                <div class="error-message">
+                    {% for error in form.category.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Description Section -->
+        <div class="form-section description-section">
+            <div class="section-header">
+                <i class="fas fa-align-left"></i>
+                <h3>Habit Description</h3>
+            </div>
+            <div class="description-input-wrapper">
+                <div class="input-icon">
+                    <i class="fas fa-pencil-alt"></i>
+                </div>
+                <textarea
+                    name="description"
+                    id="id_description"
+                    placeholder="Describe your eco-friendly habit in detail..."
+                    required
+                    maxlength="500"
+                >{{ form.description.value|default:'' }}</textarea>
+                <div class="character-count">
+                    <span id="charCount">0</span>/500
+                </div>
+            </div>
+            {% if form.description.errors %}
+                <div class="error-message">
+                    {% for error in form.description.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div class="form-help">
+                <i class="fas fa-info-circle"></i>
+                Be specific about what you'll do and how it helps the environment
+            </div>
+        </div>
+
+        <!-- Impact Score Section -->
+        <div class="form-section impact-section">
+            <div class="section-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Environmental Impact</h3>
+            </div>
+            <div class="impact-score-wrapper">
+                <div class="impact-input-container">
+                    <label for="id_impact_score">Rate the environmental impact (1-10):</label>
+                    <div class="impact-slider-container">
+                        <input
+                            type="range"
+                            name="impact_score"
+                            id="id_impact_score"
+                            min="1"
+                            max="10"
+                            value="{{ form.impact_score.value|default:'5' }}"
+                            class="impact-slider"
+                        >
+                        <div class="impact-display">
+                            <span id="impactValue">{{ form.impact_score.value|default:'5' }}</span>
+                            <span class="impact-label">Impact Level</span>
+                        </div>
+                    </div>
+                    <div class="impact-scale">
+                        <span class="scale-label low">Low Impact</span>
+                        <span class="scale-label medium">Medium Impact</span>
+                        <span class="scale-label high">High Impact</span>
+                    </div>
+                </div>
+                <div class="impact-visual">
+                    <div class="impact-bars">
+                        <div class="impact-bar" data-level="1"></div>
+                        <div class="impact-bar" data-level="2"></div>
+                        <div class="impact-bar" data-level="3"></div>
+                        <div class="impact-bar" data-level="4"></div>
+                        <div class="impact-bar" data-level="5"></div>
+                        <div class="impact-bar" data-level="6"></div>
+                        <div class="impact-bar" data-level="7"></div>
+                        <div class="impact-bar" data-level="8"></div>
+                        <div class="impact-bar" data-level="9"></div>
+                        <div class="impact-bar" data-level="10"></div>
+                    </div>
+                </div>
+            </div>
+            {% if form.impact_score.errors %}
+                <div class="error-message">
+                    {% for error in form.impact_score.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions-section">
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary btn-large" id="submitBtn">
+                    <i class="fas fa-save"></i>
+                    <span class="btn-text">Create Habit</span>
+                </button>
+                <a href="{% url 'habit_list' %}" class="btn btn-secondary btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Habits</span>
+                </a>
+            </div>
+            <div class="form-progress">
+                <div class="progress-indicator">
+                    <div class="progress-step active" data-step="1">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <div class="progress-step" data-step="2">
+                        <i class="fas fa-align-left"></i>
+                    </div>
+                    <div class="progress-step" data-step="3">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.habit-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.form-header-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-header-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.header-text h1 {
+    color: var(--primary-color);
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.header-text p {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.header-decoration {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.decoration-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    opacity: 0.3;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.decoration-circle:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.decoration-circle:nth-child(3) {
+    animation-delay: 1s;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.2); opacity: 0.6; }
+}
+
+.habit-form {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+}
+
+.form-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.section-header i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.section-header h3 {
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Category Selection */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.category-option {
+    position: relative;
+    cursor: pointer;
+    margin: 0;
+}
+
+.category-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.category-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.category-card:hover::before {
+    left: 100%;
+}
+
+.category-option input[type="radio"]:checked + .category-card {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(76, 175, 80, 0.05) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.15);
+}
+
+.transport-card.category-option input[type="radio"]:checked + .category-card {
+    border-color: #1976d2;
+    background: linear-gradient(135deg, rgba(25, 118, 210, 0.05) 0%, rgba(66, 165, 245, 0.05) 100%);
+}
+
+.energy-card.category-option input[type="radio"]:checked + .category-card {
+    border-color: #7b1fa2;
+    background: linear-gradient(135deg, rgba(123, 31, 162, 0.05) 0%, rgba(142, 36, 170, 0.05) 100%);
+}
+
+.food-card.category-option input[type="radio"]:checked + .category-card {
+    border-color: #388e3c;
+    background: linear-gradient(135deg, rgba(56, 142, 60, 0.05) 0%, rgba(76, 175, 80, 0.05) 100%);
+}
+
+.waste-card.category-option input[type="radio"]:checked + .category-card {
+    border-color: #f57c00;
+    background: linear-gradient(135deg, rgba(245, 124, 0, 0.05) 0%, rgba(255, 152, 0, 0.05) 100%);
+}
+
+.category-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.transport-card .category-icon {
+    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+}
+
+.energy-card .category-icon {
+    background: linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%);
+}
+
+.food-card .category-icon {
+    background: linear-gradient(135deg, #388e3c 0%, #66bb6a 100%);
+}
+
+.waste-card .category-icon {
+    background: linear-gradient(135deg, #f57c00 0%, #ffb74d 100%);
+}
+
+.category-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.category-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.category-check {
+    margin-left: auto;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.category-option input[type="radio"]:checked + .category-card .category-check {
+    opacity: 1;
+}
+
+/* Description Section */
+.description-input-wrapper {
+    position: relative;
+    margin-top: 1.5rem;
+}
+
+.input-icon {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    z-index: 2;
+}
+
+.description-input-wrapper textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.description-input-wrapper textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.character-count {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.form-help {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(46, 125, 50, 0.05);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.form-help i {
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+/* Impact Score Section */
+.impact-score-wrapper {
+    margin-top: 1.5rem;
+}
+
+.impact-input-container {
+    margin-bottom: 2rem;
+}
+
+.impact-input-container label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.impact-slider-container {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.impact-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #ffebee 0%, #fff3e0 25%, #e8f5e8 50%, #e3f2fd 75%, #e3f2fd 100%);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.impact-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+    transition: all 0.3s ease;
+}
+
+.impact-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.impact-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.impact-display {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+#impactValue {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.impact-label {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.impact-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    padding: 0 1rem;
+}
+
+.scale-label {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.scale-label.low { color: #c62828; }
+.scale-label.medium { color: #ef6c00; }
+.scale-label.high { color: #2e7d32; }
+
+.impact-visual {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.impact-bars {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    height: 100px;
+    gap: 0.5rem;
+}
+
+.impact-bar {
+    flex: 1;
+    background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.impact-bar::after {
+    content: attr(data-level);
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.impact-bar.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.impact-bar.active::after {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+/* Form Actions */
+.form-actions-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    min-width: 180px;
+    transition: all 0.3s ease;
+}
+
+.btn-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background: var(--secondary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.form-progress {
+    display: flex;
+    justify-content: center;
+}
+
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 2rem;
+    background: white;
+    border-radius: 25px;
+    border: 2px solid var(--border-color);
+}
+
+.progress-step {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--border-color);
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.progress-step::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 2rem;
+    height: 2px;
+    background: var(--border-color);
+    transform: translateY(-50%);
+}
+
+.progress-step:last-child::after {
+    display: none;
+}
+
+.progress-step.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+}
+
+.progress-step.completed {
+    background: linear-gradient(135deg, var(--success-color) 0%, #66bb6a 100%);
+    color: white;
+}
+
+.error-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border: 1px solid #ef5350;
+    border-radius: 8px;
+    color: #c62828;
+    font-size: 0.9rem;
+}
+
+.error-message span {
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .habit-form-container {
+        padding: 0 0.5rem;
+    }
+
+    .form-header-card {
+        padding: 2rem 1rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .header-text h1 {
+        font-size: 1.8rem;
+    }
+
+    .habit-form {
+        padding: 2rem 1rem;
+    }
+
+    .form-section {
+        padding: 1.5rem 1rem;
+    }
+
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .category-card {
+        padding: 1rem;
+    }
+
+    .impact-bars {
+        height: 80px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-large {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .progress-indicator {
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Character counter for description
+const textarea = document.getElementById('id_description');
+const charCount = document.getElementById('charCount');
+
+if (textarea && charCount) {
+    textarea.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = count;
+
+        // Change color based on character count
+        if (count > 450) {
+            charCount.style.color = '#f44336';
+        } else if (count > 400) {
+            charCount.style.color = '#ff9800';
+        } else {
+            charCount.style.color = 'var(--text-light)';
+        }
+
+        // Auto-resize textarea
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
+    // Initialize character count
+    charCount.textContent = textarea.value.length;
+}
+
+// Impact score slider functionality
+const impactSlider = document.getElementById('id_impact_score');
+const impactValue = document.getElementById('impactValue');
+const impactBars = document.querySelectorAll('.impact-bar');
+
+if (impactSlider && impactValue && impactBars) {
+    function updateImpactDisplay() {
+        const value = parseInt(impactSlider.value);
+        impactValue.textContent = value;
+
+        // Update visual bars
+        impactBars.forEach((bar, index) => {
+            if (index < value) {
+                bar.classList.add('active');
+            } else {
+                bar.classList.remove('active');
+            }
+        });
+
+        // Update color based on impact level
+        if (value <= 3) {
+            impactValue.style.color = '#c62828';
+        } else if (value <= 6) {
+            impactValue.style.color = '#ef6c00';
+        } else {
+            impactValue.style.color = '#2e7d32';
+        }
+    }
+
+    impactSlider.addEventListener('input', updateImpactDisplay);
+    impactSlider.addEventListener('change', updateImpactDisplay);
+
+    // Initialize
+    updateImpactDisplay();
+}
+
+// Category selection visual feedback
+const categoryOptions = document.querySelectorAll('.category-option input[type="radio"]');
+const progressSteps = document.querySelectorAll('.progress-step');
+
+categoryOptions.forEach(option => {
+    option.addEventListener('change', function() {
+        if (this.checked) {
+            // Update progress indicator
+            progressSteps[0].classList.add('completed');
+            progressSteps[1].classList.add('active');
+        }
+    });
+});
+
+// Description input focus/blur handling
+if (textarea) {
+    textarea.addEventListener('focus', function() {
+        progressSteps[1].classList.add('completed');
+        progressSteps[2].classList.add('active');
+    });
+
+    textarea.addEventListener('blur', function() {
+        if (this.value.trim().length > 0) {
+            progressSteps[1].classList.add('completed');
+            progressSteps[2].classList.add('active');
+        }
+    });
+}
+
+// Impact score change handling
+if (impactSlider) {
+    impactSlider.addEventListener('input', function() {
+        progressSteps[2].classList.add('completed');
+    });
+}
+
+// Form submission with enhanced feedback
+document.getElementById('habitForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const originalText = btnText.textContent;
+
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span class="btn-text">Creating Habit...</span>';
+    submitBtn.disabled = true;
+
+    // Add success animation class
+    submitBtn.classList.add('submitting');
+
+    // Re-enable after 4 seconds (in case of slow response)
+    setTimeout(() => {
+        if (btnText) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i><span class="btn-text">' + originalText + '</span>';
+        }
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('submitting');
+    }, 4000);
+});
+
+// Form validation feedback
+const formSections = document.querySelectorAll('.form-section');
+
+formSections.forEach(section => {
+    const inputs = section.querySelectorAll('input, textarea, select');
+
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value.trim() !== '') {
+                section.classList.add('completed');
+            } else {
+                section.classList.remove('completed');
+            }
+        });
+
+        input.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                section.classList.add('completed');
+            } else {
+                section.classList.remove('completed');
+            }
+        });
+    });
+});
+
+// Initialize form state
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-resize textarea on load
+    if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    // Set initial progress state
+    const categorySelected = document.querySelector('.category-option input[type="radio"]:checked');
+    if (categorySelected) {
+        progressSteps[0].classList.add('completed');
+        progressSteps[1].classList.add('active');
+    }
+
+    const descriptionValue = textarea ? textarea.value.trim() : '';
+    if (descriptionValue) {
+        progressSteps[1].classList.add('completed');
+        progressSteps[2].classList.add('active');
+    }
+
+    const impactValue = impactSlider ? impactSlider.value : '5';
+    if (impactValue !== '5') {
+        progressSteps[2].classList.add('completed');
+    }
+});
+</script>
+{% endblock %}

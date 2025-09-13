@@ -1,0 +1,587 @@
+{% extends 'base.html' %}
+
+{% block title %}My Recommendations - Green Sensei{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1><i class="fas fa-lightbulb"></i> My Eco-Friendly Recommendations</h1>
+        <p>Personalized tips and suggestions from your AI coach</p>
+    </div>
+
+    <!-- Add New Recommendation Form -->
+    <div class="add-recommendation-section" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--background-color); border-radius: var(--border-radius);">
+        <h3><i class="fas fa-plus"></i> Add Personal Note</h3>
+        <form method="post" id="recommendationForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.message.id_for_label }}">
+                    <i class="fas fa-comment"></i> Your Eco-Tip or Note
+                </label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                    <div class="error-message">
+                        {% for error in form.message.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <small class="form-help">Share your own sustainable living tips or notes</small>
+            </div>
+            <button type="submit" class="btn btn-primary" id="addBtn">
+                <i class="fas fa-save"></i> Add Recommendation
+            </button>
+        </form>
+    </div>
+
+    <!-- Recommendations Table -->
+    {% if recommendations %}
+        <div class="recommendations-table-container">
+            <h3><i class="fas fa-list"></i> Your Recommendations ({{ recommendations|length }})</h3>
+            <div class="table-responsive">
+                <table class="table recommendations-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-comment"></i> Message</th>
+                            <th><i class="fas fa-eye"></i> Seen</th>
+                            <th><i class="fas fa-calendar"></i> Created At</th>
+                            <th><i class="fas fa-cogs"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in recommendations %}
+                        <tr class="{% if not rec.is_seen %}unseen-row{% endif %}">
+                            <td class="message-cell">
+                                <div class="message-content">
+                                    <p>{{ rec.message|truncatechars:100 }}</p>
+                                    {% if rec.habit %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-link"></i> Related to: {{ rec.habit.description|truncatechars:50 }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="seen-cell">
+                                {% if rec.is_seen %}
+                                    <span class="status-badge status-seen">
+                                        <i class="fas fa-check"></i> Seen
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge status-unseen">
+                                        <i class="fas fa-eye-slash"></i> Unseen
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="date-cell">
+                                {{ rec.created_at|date:"M d, Y H:i" }}
+                            </td>
+                            <td class="actions-cell">
+                                {% if not rec.is_seen %}
+                                    <button class="btn btn-sm btn-success" onclick="markAsSeen('{{ rec.id }}')">
+                                        <i class="fas fa-check"></i> Mark Seen
+                                    </button>
+                                {% endif %}
+                                <button class="btn btn-sm btn-danger" onclick="deleteRecommendation('{{ rec.id }}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-lightbulb" style="font-size: 4rem; color: var(--text-light); margin-bottom: 1rem;"></i>
+            <h2>No recommendations yet</h2>
+            <p>Your AI coach will provide personalized recommendations as you add more habits. You can also add your own notes above!</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Tips Section -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <h2><i class="fas fa-star"></i> Quick Eco-Tips</h2>
+        <p>General sustainable living suggestions</p>
+    </div>
+
+    <div class="tips-grid">
+        <div class="tip-card">
+            <i class="fas fa-shower"></i>
+            <h4>Save Water</h4>
+            <p>Take shorter showers and fix leaky faucets to reduce water waste.</p>
+        </div>
+        <div class="tip-card">
+            <i class="fas fa-plug"></i>
+            <h4>Unplug Devices</h4>
+            <p>Unplug electronics when not in use to avoid "vampire" energy drain.</p>
+        </div>
+        <div class="tip-card">
+            <i class="fas fa-shopping-bag"></i>
+            <h4>Reuse Bags</h4>
+            <p>Carry reusable shopping bags to reduce plastic waste.</p>
+        </div>
+        <div class="tip-card">
+            <i class="fas fa-bicycle"></i>
+            <h4>Use Public Transport</h4>
+            <p>Opt for buses, trains, or cycling instead of driving when possible.</p>
+        </div>
+        <div class="tip-card">
+            <i class="fas fa-utensils"></i>
+            <h4>Reduce Food Waste</h4>
+            <p>Plan meals and use leftovers to minimize food waste.</p>
+        </div>
+        <div class="tip-card">
+            <i class="fas fa-recycle"></i>
+            <h4>Recycle Properly</h4>
+            <p>Learn your local recycling guidelines and sort waste correctly.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.recommendations-table-container {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 2px solid var(--border-color);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendations-table-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+}
+
+.recommendations-table-container h3 {
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.recommendations-table-container h3 i {
+    font-size: 1.5rem;
+}
+
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid var(--border-color);
+}
+
+.recommendations-table {
+    width: 100%;
+    background: white;
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.recommendations-table thead {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.recommendations-table th {
+    padding: 1.75rem 1.5rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.75px;
+    border: none;
+    position: relative;
+}
+
+.recommendations-table th i {
+    margin-right: 0.75rem;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.recommendations-table td {
+    padding: 1.75rem 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    vertical-align: middle;
+    font-size: 1rem;
+}
+
+.recommendations-table tbody tr {
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.recommendations-table tbody tr:hover {
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.08) 0%, rgba(76, 175, 80, 0.08) 100%);
+    transform: translateX(4px) scale(1.01);
+    box-shadow: 0 6px 20px rgba(46, 125, 50, 0.15);
+    z-index: 1;
+}
+
+.recommendations-table tbody tr:hover .status-badge {
+    transform: scale(1.05);
+}
+
+.unseen-row {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 235, 59, 0.05) 100%);
+    border-left: 4px solid #ffc107;
+}
+
+.unseen-row:hover {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 235, 59, 0.1) 100%);
+}
+
+.message-cell {
+    max-width: 400px;
+    min-width: 250px;
+}
+
+.message-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 500;
+    word-wrap: break-word;
+}
+
+.message-content small {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    font-style: italic;
+    display: block;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(46, 125, 50, 0.05);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.seen-cell {
+    text-align: center;
+    width: 150px;
+    min-width: 120px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.status-badge i {
+    font-size: 1rem;
+}
+
+.status-seen {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    color: #2e7d32;
+    border-color: #66bb6a;
+    box-shadow: 0 3px 8px rgba(46, 125, 50, 0.2);
+}
+
+.status-unseen {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    color: #f57c00;
+    border-color: #ffb74d;
+    box-shadow: 0 3px 8px rgba(245, 124, 0, 0.2);
+    animation: pulse-unseen 2s ease-in-out infinite;
+}
+
+@keyframes pulse-unseen {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.date-cell {
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+    min-width: 180px;
+}
+
+.actions-cell {
+    text-align: center;
+    white-space: nowrap;
+    min-width: 150px;
+}
+
+.btn-sm {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    margin: 0 0.375rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    min-width: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #66bb6a 100%);
+    color: white;
+    box-shadow: 0 3px 8px rgba(46, 125, 50, 0.2);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--error-color) 0%, #e57373 100%);
+    color: white;
+    box-shadow: 0 3px 8px rgba(244, 67, 54, 0.2);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+.btn-sm i {
+    font-size: 0.9rem;
+}
+
+.add-recommendation-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 3rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.add-recommendation-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+}
+
+.add-recommendation-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 2rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.add-recommendation-section h3 i {
+    font-size: 1.5rem;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.tip-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.tip-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.tip-card:hover::before {
+    left: 100%;
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(46, 125, 50, 0.2);
+    border-color: var(--primary-color);
+}
+
+.tip-card i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.tip-card:hover i {
+    transform: scale(1.1);
+}
+
+.tip-card h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.tip-card p {
+    color: var(--text-light);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.empty-state i {
+    font-size: 5rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.empty-state h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.empty-state p {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .recommendations-table-container {
+        padding: 1rem;
+    }
+
+    .recommendations-table th,
+    .recommendations-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .message-cell {
+        max-width: 200px;
+    }
+
+    .message-content p {
+        font-size: 0.9rem;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+        margin: 0.125rem;
+    }
+
+    .tips-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .tip-card {
+        padding: 1.5rem;
+    }
+
+    .add-recommendation-section {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function deleteRecommendation(recId) {
+    if (confirm('Are you sure you want to delete this recommendation?')) {
+        // For now, show a message. In a full implementation, this would make an AJAX call
+        alert('Delete functionality would be implemented with AJAX for a better user experience.');
+    }
+}
+
+function markAsSeen(recId) {
+    if (confirm('Mark this recommendation as seen?')) {
+        // For now, show a message. In a full implementation, this would make an AJAX call
+        alert('Mark as seen functionality would be implemented with AJAX for a better user experience.');
+        // You could reload the page or update the UI here
+        // location.reload();
+    }
+}
+
+document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+    const addBtn = document.getElementById('addBtn');
+    const originalText = addBtn.innerHTML;
+
+    // Show loading state
+    addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+    addBtn.disabled = true;
+
+    // Re-enable after 2 seconds
+    setTimeout(() => {
+        addBtn.innerHTML = originalText;
+        addBtn.disabled = false;
+    }, 2000);
+});
+</script>
+{% endblock %}

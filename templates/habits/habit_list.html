@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Your Habits</h2>
+<a href="{% url 'habit_create' %}">Add New Habit</a>
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Impact Score</th>
+        <th>Date Logged</th>
+    </tr>
+    {% for habit in habits %}
+    <tr>
+        <td>{{ habit.category }}</td>
+        <td>{{ habit.description }}</td>
+        <td>{{ habit.impact_score }}</td>
+        <td>{{ habit.date_logged }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No habits yet.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}
