@@ -1,4 +1,4 @@
 # Green_Sensei
 AI Environmental coaching
 
-i might need to clean this sht up
+i might need to clean this up
